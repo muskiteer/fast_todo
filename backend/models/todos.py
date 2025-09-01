@@ -11,3 +11,18 @@ class todos(Base):
     
     todo = Column(String, index=True)
     done = Column(Boolean, default=False)
+
+
+def insert_todo():
+    return {"insert_todo"}
+
+def update_todo():
+    return {"update_todo"}
+
+def delete_todo():
+    return {"delete_todo"}
+
+def get_todos():
+    return {"get_todos"}
+
+
