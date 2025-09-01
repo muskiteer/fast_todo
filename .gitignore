@@ -1,0 +1,7 @@
+backend/venv
+backend/test.db
+backend/__pycache__
+backend/models/__pycache__
+backend/internal/__pycache__
+backend/routes/__pycache__
+
