@@ -1,11 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from models.todos import get_todos, insert_todo, update_todo, delete_todo
 from models.user import login, logout, register, auth
+from internal.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
 todo_router = APIRouter(prefix="/api", tags=["todos"])
 
-def not_implemented():
-    return {"not implemented"}
+class TodoCreate(BaseModel):
+    username: str
+    todo: str
 
 @todo_router.post("/users/login")
 def login_routes():
@@ -28,12 +32,12 @@ def get_todos_routes():
     return get_todos()
 
 @todo_router.post("/todos/post")
-def create_todo_routes():
-    return insert_todo()
+async def create_todo_routes(todo: TodoCreate, db: AsyncSession = Depends(get_db)):
+    return await insert_todo(todo, db)
 
 @todo_router.delete("/todos/delete")
-def delete_todo_routes():
-    return delete_todo()
+async def delete_todo_routes(todo_id: int, db: AsyncSession = Depends(get_db)):
+    return await delete_todo(todo_id, db)
 
 @todo_router.put("/todos/update")
 def update_todo_routes():
