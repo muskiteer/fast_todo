@@ -14,9 +14,9 @@ class todos(Base):
     todo = Column(String, index=True)
     done = Column(Boolean, default=False)
 
-async def insert_todo(todo_data, db: AsyncSession):
+async def insert_todo(todo_data, db: AsyncSession , username: str):
     new_todo = todos(
-        username=todo_data.username, 
+        username=username, 
         todo=todo_data.todo
     )
     db.add(new_todo)
@@ -24,20 +24,32 @@ async def insert_todo(todo_data, db: AsyncSession):
     await db.refresh(new_todo)
     return new_todo
 
-def update_todo():
-    return {"update_todo"}
-
-async def delete_todo(todo_id, db: AsyncSession):
+async def update_todo( id: int, todo_data, db: AsyncSession, username: str):
     db_query = await db.execute(
-        select(todos).where(todos.id == todo_id )
+        select(todos).where(todos.id == id, todos.username == username)
+    )
+    result = db_query.scalar()
+    if result:
+        result.todo = todo_data.todo
+        result.done = todo_data.done
+        await db.commit()
+        await db.refresh(result)
+        return result
+    return {"error": "Todo not found"}
+
+async def delete_todo(id: int, db: AsyncSession, username: str):
+    db_query = await db.execute(
+        select(todos).where(todos.id == id, todos.username == username)
     )
     result = db_query.scalar()
     if result:
         await db.delete(result)
         await db.commit()
-        return {"successfully deleted": todo_id}
+        return {"successfully deleted": result.todo}
 
-def get_todos():
-    return {"get_todos"}
-
+async def get_todos(db: AsyncSession, username: str):
+    db_query = await db.execute(
+        select(todos).where(todos.username == username)
+    )
+    return db_query.scalars().all()
 
